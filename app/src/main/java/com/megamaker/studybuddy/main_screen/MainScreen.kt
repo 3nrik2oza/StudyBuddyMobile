@@ -18,6 +18,7 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -30,10 +31,11 @@ import com.megamaker.studybuddy.data.Faculty
 @Composable
 fun MainScreen(
     state: MainScreenState,
-    onEvent: (MainScreenEvent) -> Unit
-){
+    onEvent: (MainScreenEvent) -> Unit,
+    onLogout: () -> Unit
+) {
 
-    if(state.showCreateFacultyDialog){
+    if (state.showCreateFacultyDialog) {
         AddNewFacultyDialog(
             state = state,
             onEvent = onEvent
@@ -43,28 +45,46 @@ fun MainScreen(
     Column(
         modifier = Modifier.padding(16.dp)
     ) {
-        Spacer(Modifier.height(50.dp))
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.End
+        ) {
+            Button(
+                onClick = onLogout,
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.error
+                )
+            ) {
+                Text("Logout")
+            }
+        }
+
+        Spacer(Modifier.height(20.dp))
 
         Text(
-            "StudyBuddy",
+            text = "StudyBuddy",
             fontSize = 20.sp,
             fontWeight = FontWeight.Bold
         )
 
-        LazyColumn(
+        Spacer(Modifier.height(16.dp))
 
-        ) {
-            itemsIndexed(state.faculties){ index, item ->
+        LazyColumn {
+            itemsIndexed(state.faculties) { _, item ->
                 FacultyCard(item)
             }
 
             item {
-                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.Center
+                ) {
                     Button(
                         onClick = {
                             onEvent(MainScreenEvent.ToggleCreateFacultyDialog)
                         }
-                    ){
+                    ) {
                         Text("Add new faculty")
                     }
                 }
@@ -72,37 +92,47 @@ fun MainScreen(
         }
     }
 }
+
 @Composable
 fun AddNewFacultyDialog(
     state: MainScreenState,
     onEvent: (MainScreenEvent) -> Unit
-){
+) {
     AlertDialog(
         onDismissRequest = { onEvent(MainScreenEvent.ToggleCreateFacultyDialog) },
         confirmButton = {},
         dismissButton = {},
-        modifier = Modifier,
         containerColor = Color.White,
         title = {
             Text(
                 text = "Create faculty",
                 fontSize = 20.sp,
-                fontWeight = FontWeight.Bold,
+                fontWeight = FontWeight.Bold
             )
         },
         text = {
             Column(
                 modifier = Modifier.padding(16.dp)
             ) {
+
                 OutlinedTextField(
                     modifier = Modifier.fillMaxWidth(),
                     value = state.facultyName,
-                    placeholder = { Text(text = "Enter faculty name...", color = Color.LightGray) },
+                    placeholder = {
+                        Text(
+                            text = "Enter faculty name...",
+                            color = Color.LightGray
+                        )
+                    },
                     maxLines = 1,
-                    onValueChange = { if(it.length < 30){
-                        onEvent(MainScreenEvent.OnFacultyNameChange(it))
-                    } },
-                    keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.None),
+                    onValueChange = {
+                        if (it.length < 30) {
+                            onEvent(MainScreenEvent.OnFacultyNameChange(it))
+                        }
+                    },
+                    keyboardOptions = KeyboardOptions(
+                        capitalization = KeyboardCapitalization.None
+                    )
                 )
 
                 Spacer(Modifier.height(16.dp))
@@ -110,31 +140,41 @@ fun AddNewFacultyDialog(
                 OutlinedTextField(
                     modifier = Modifier.fillMaxWidth(),
                     value = state.facultySlug,
-                    placeholder = { Text(text = "Enter faculty slug", color = Color.LightGray) },
+                    placeholder = {
+                        Text(
+                            text = "Enter faculty slug",
+                            color = Color.LightGray
+                        )
+                    },
                     maxLines = 1,
-                    onValueChange = { if(it.length < 30){
-                        onEvent(MainScreenEvent.OnFacultySlugChange(it))
-                    } },
-                    keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.None),
+                    onValueChange = {
+                        if (it.length < 30) {
+                            onEvent(MainScreenEvent.OnFacultySlugChange(it))
+                        }
+                    },
+                    keyboardOptions = KeyboardOptions(
+                        capitalization = KeyboardCapitalization.None
+                    )
                 )
 
                 Spacer(Modifier.height(16.dp))
 
-                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.Center
+                ) {
                     Button(
                         onClick = {
                             onEvent(MainScreenEvent.CreateNewFaculty)
                         }
-                    ){
+                    ) {
                         Text("Create new faculty")
                     }
                 }
-
             }
         }
     )
 }
-
 
 @Composable
 fun FacultyCard(
@@ -146,7 +186,6 @@ fun FacultyCard(
         modifier = modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp, vertical = 8.dp),
-            //.clickable { onClick() },
         shape = RoundedCornerShape(12.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
