@@ -7,19 +7,30 @@ import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
 import com.megamaker.studybuddy.auth.LoginScreen
 import com.megamaker.studybuddy.auth.LoginViewModel
 import com.megamaker.studybuddy.data.AuthStore
-import com.megamaker.studybuddy.main_screen.MainScreen
-import com.megamaker.studybuddy.main_screen.MainScreenViewModel
+import com.megamaker.studybuddy.forum.ForumEvent
+import com.megamaker.studybuddy.forum.ForumScreen
+import com.megamaker.studybuddy.forum.ForumViewModel
+import com.megamaker.studybuddy.main_screen.ui.MainScreen
+import com.megamaker.studybuddy.main_screen.ui.MainScreenViewModel
+import com.megamaker.studybuddy.thread.ThreadScreen
+import com.megamaker.studybuddy.thread.ThreadScreenEvent
+import com.megamaker.studybuddy.thread.ThreadViewModel
 import com.megamaker.studybuddy.ui.theme.StudyBuddyTheme
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val mainVm: MainScreenViewModel by viewModels()
+        //val mainVm: MainScreenViewModel by viewModels()
         val loginVm: LoginViewModel by viewModels()
+        val forumVm: ForumViewModel by viewModels()
+        val threadVm: ThreadViewModel by viewModels()
 
         enableEdgeToEdge()
         setContent {
@@ -35,12 +46,40 @@ class MainActivity : ComponentActivity() {
                         onLogin = { loginVm.login { } }
                     )
                 } else {
-                    val state by mainVm.state.collectAsState()
-                    MainScreen(
-                        state = state,
-                        onEvent = mainVm::onEvent,
-                        onLogout = { mainVm.logout() }
-                    )
+                    val navController = rememberNavController()
+
+                    NavHost(
+                        navController = navController,
+                        startDestination = "ForumScreen") {
+
+                        composable("ForumScreen") {
+                            val state by forumVm.state.collectAsState()
+                            ForumScreen(
+                                state = state,
+                                onEvent = {
+                                    when(it){
+                                        is ForumEvent.OpenThread -> {
+                                            navController.navigate("ThreadScreen")
+                                            threadVm.onEvent(ThreadScreenEvent.OpenThreadScreen(it.threadId))
+                                        }
+                                        else -> {}
+                                    }
+                                    forumVm.onEvent(it)
+                                }
+                            )
+                        }
+
+                        composable("ThreadScreen") {
+                            val state by threadVm.state.collectAsState()
+                            ThreadScreen(
+                                state = state,
+                                onEvent = {
+                                    threadVm.onEvent(it)
+                                }
+                            )
+                        }
+                    }
+
                 }
             }
         }

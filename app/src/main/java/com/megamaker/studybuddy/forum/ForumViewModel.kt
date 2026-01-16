@@ -21,10 +21,14 @@ class ForumViewModel(application: Application) : AndroidViewModel(application) {
 
     private val queue: RequestQueue = Volley.newRequestQueue(application)
 
+    init {
+        loadThreads()
+    }
+
     fun onEvent(event: ForumEvent) {
         when (event) {
-            ForumEvent.LoadThreads -> loadThreads()
-            is ForumEvent.OpenThread -> loadThread(event.threadId)
+            ForumEvent.LoadThreads -> {}
+            is ForumEvent.OpenThread -> {}//loadThread(event.threadId)
             ForumEvent.BackToList -> _state.update { it.copy(selectedThread = null, selectedReplies = emptyList(), replyText = "") }
 
             is ForumEvent.OnReplyTextChange -> _state.update { it.copy(replyText = event.v) }
@@ -55,7 +59,7 @@ class ForumViewModel(application: Application) : AndroidViewModel(application) {
 
         val url = "${_state.value.baseUrl}/api/v1/ForumThread"
         val req = object : JsonArrayRequest(
-            Request.Method.GET,
+            Method.GET,
             url,
             null,
             { resp ->
@@ -77,29 +81,7 @@ class ForumViewModel(application: Application) : AndroidViewModel(application) {
         queue.add(req)
     }
 
-    private fun loadThread(id: Int) {
-        _state.update { it.copy(loading = true, error = null) }
 
-        val url = "${_state.value.baseUrl}/api/v1/ForumThread/$id"
-        val req = object : JsonObjectRequest(
-            Request.Method.GET,
-            url,
-            null,
-            { resp ->
-                try {
-                    val thread = parseThread(resp)
-                    val replies = thread.replies
-                    _state.update { it.copy(loading = false, selectedThread = thread, selectedReplies = replies) }
-                } catch (e: Exception) {
-                    _state.update { it.copy(loading = false, error = e.toString()) }
-                }
-            },
-            { err -> _state.update { it.copy(loading = false, error = err.toString()) } }
-        ) {
-            override fun getHeaders(): MutableMap<String, String> = headers().toMutableMap()
-        }
-        queue.add(req)
-    }
 
     private fun sendReply() {
         val thread = _state.value.selectedThread ?: return
@@ -126,7 +108,7 @@ class ForumViewModel(application: Application) : AndroidViewModel(application) {
             body,
             { _ ->
                 _state.update { it.copy(replyText = "") }
-                loadThread(thread.id)
+                //loadThread(thread.id)
             },
             { err -> _state.update { it.copy(loading = false, error = err.toString()) } }
         ) {

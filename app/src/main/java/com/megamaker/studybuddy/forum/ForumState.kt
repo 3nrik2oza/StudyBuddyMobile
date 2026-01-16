@@ -3,6 +3,7 @@ package com.megamaker.studybuddy.forum
 import com.megamaker.studybuddy.data.ForumReply
 import com.megamaker.studybuddy.data.ForumThread
 
+
 data class ForumState(
     val baseUrl: String = "https://studdybuddyapp.azurewebsites.net",
     val apiKey: String = "SecretKey",

@@ -1,4 +1,4 @@
-package com.megamaker.studybuddy.main_screen
+package com.megamaker.studybuddy.main_screen.ui
 
 interface MainScreenEvent {
 

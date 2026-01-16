@@ -1,10 +1,9 @@
 // app/src/main/java/com/megamaker/studybuddy/main_screen/MainScreenViewModel.kt
-package com.megamaker.studybuddy.main_screen
+package com.megamaker.studybuddy.main_screen.ui
 
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
-import com.android.volley.Request
 import com.android.volley.RequestQueue
 import com.android.volley.toolbox.JsonArrayRequest
 import com.android.volley.toolbox.JsonObjectRequest
@@ -33,34 +32,21 @@ class MainScreenViewModel(application: Application) : AndroidViewModel(applicati
     }
 
     init {
-        val request = object : JsonArrayRequest(
-            Request.Method.GET,
+        val request = object: JsonArrayRequest(
+            Method.GET,
             state.value.urlString,
             null,
             { response ->
                 try {
-                    val faculties = mutableListOf<Faculty>()
-                    for (i in 0 until response.length()) {
-                        val f = Faculty(
-                            response.getJSONObject(i).getString("id"),
-                            response.getJSONObject(i).getString("name"),
-                            response.getJSONObject(i).getString("slug")
-                        )
-                        faculties.add(f)
-                    }
-                    _state.update { it.copy(faculties = faculties, facultyName = "", facultySlug = "") }
-                } catch (e: Exception) {
+                    _state.update { it.copy(error = response.toString()) }
+                }catch (e: Exception){
                     _state.update { it.copy(error = e.toString()) }
                 }
             },
             { error ->
-                val status = error.networkResponse?.statusCode
-                if (status == 401) {
-                    viewModelScope.launch { authStore.clear() }
-                }
                 _state.update { it.copy(error = error.toString()) }
             }
-        ) {
+        ){
             override fun getHeaders(): Map<String, String> = authHeaders()
         }
         queue.add(request)
@@ -104,7 +90,7 @@ class MainScreenViewModel(application: Application) : AndroidViewModel(applicati
         }
 
         val request = object : JsonObjectRequest(
-            Request.Method.POST,
+            Method.POST,
             "https://studdybuddyapp.azurewebsites.net/api/v1/Faculties",
             body,
             { _ ->

@@ -13,12 +13,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.json.JSONObject
 
-data class LoginState(
-    val email: String = "",
-    val password: String = "",
-    val loading: Boolean = false,
-    val error: String? = null
-)
+
 
 class LoginViewModel(application: Application) : AndroidViewModel(application) {
     private val _state = MutableStateFlow(LoginState())
@@ -34,7 +29,7 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
         _state.update { it.copy(loading = true, error = null) }
 
         val body = JSONObject().apply {
-            put("email", state.value.email)
+            put("email", state.value.email.trim())
             put("password", state.value.password)
         }
 

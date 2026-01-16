@@ -1,4 +1,4 @@
-package com.megamaker.studybuddy.main_screen
+package com.megamaker.studybuddy.main_screen.ui
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -70,6 +70,13 @@ fun MainScreen(
 
         Spacer(Modifier.height(16.dp))
 
+        Column {
+            Text(
+                text = state.error
+            )
+        }
+
+        /*
         LazyColumn {
             itemsIndexed(state.faculties) { _, item ->
                 FacultyCard(item)
@@ -89,7 +96,7 @@ fun MainScreen(
                     }
                 }
             }
-        }
+        }*/
     }
 }
 

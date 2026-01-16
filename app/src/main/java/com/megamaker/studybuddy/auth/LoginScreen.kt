@@ -12,7 +12,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.megamaker.studybuddy.auth.components.CustomPasswordTextField
 
 @Composable
 fun LoginScreen(
@@ -23,9 +25,10 @@ fun LoginScreen(
 
 ) {
     Column(
-        modifier = Modifier.fillMaxSize().padding(20.dp),
+        modifier = Modifier.fillMaxSize().padding(20.dp).padding(top = 10.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
+
         Text("Admin Login", style = MaterialTheme.typography.headlineSmall)
 
         OutlinedTextField(
@@ -35,12 +38,10 @@ fun LoginScreen(
             modifier = Modifier.fillMaxWidth()
         )
 
-        OutlinedTextField(
-            value = state.password,
+        CustomPasswordTextField(
+            inputValue = state.password,
             onValueChange = onPasswordChange,
-            label = { Text("Password") },
-            visualTransformation = PasswordVisualTransformation(),
-            modifier = Modifier.fillMaxWidth()
+            hintText = "Password"
         )
 
         state.error?.let { Text(it, color = MaterialTheme.colorScheme.error) }
@@ -53,4 +54,10 @@ fun LoginScreen(
             Text(if (state.loading) "Logging in..." else "Login")
         }
     }
+}
+
+@Preview
+@Composable
+fun LoginScreenPreview() {
+    LoginScreen(state = LoginState(), onEmailChange = {}, onPasswordChange = {}, onLogin = {})
 }
