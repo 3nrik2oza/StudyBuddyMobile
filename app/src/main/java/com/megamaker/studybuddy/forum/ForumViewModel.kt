@@ -2,17 +2,26 @@ package com.megamaker.studybuddy.forum
 
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.viewModelScope
 import com.android.volley.Request
 import com.android.volley.RequestQueue
 import com.android.volley.toolbox.JsonArrayRequest
 import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.Volley
+import com.megamaker.studybuddy.data.AuthStore
 import com.megamaker.studybuddy.data.ForumReply
 import com.megamaker.studybuddy.data.ForumThread
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 import org.json.JSONObject
+import java.text.SimpleDateFormat
+import java.util.Calendar
+import java.util.Date
+import java.util.Locale
 
 class ForumViewModel(application: Application) : AndroidViewModel(application) {
 
@@ -21,8 +30,15 @@ class ForumViewModel(application: Application) : AndroidViewModel(application) {
 
     private val queue: RequestQueue = Volley.newRequestQueue(application)
 
+    private val authStore = AuthStore(application)
+
     init {
         loadThreads()
+        viewModelScope.launch {
+            val name = authStore.nameFlow.first() ?: ""
+            val id = authStore.idFlow.first() ?: ""
+            _state.update { it.copy(name = name, userId = id) }
+        }
     }
 
     fun onEvent(event: ForumEvent) {
@@ -152,9 +168,9 @@ class ForumViewModel(application: Application) : AndroidViewModel(application) {
             put("category", _state.value.newThreadCategory)
             put("subjectId", _state.value.newThreadSubjectId)
             put("facultyId", _state.value.newThreadFacultyId)
-            put("authorUserId", "android-admin")
-            put("authorName", "Android Admin")
-            put("createdAt", "")
+            put("authorUserId", _state.value.userId)
+            put("authorName", _state.value.name)
+            put("createdAt", getCurrentDateTime().toString())
             put("repliesCount", 0)
             put("replies", org.json.JSONArray())
         }
@@ -214,4 +230,13 @@ class ForumViewModel(application: Application) : AndroidViewModel(application) {
             replies = replies
         )
     }
+}
+
+fun Date.toString(format: String, locale: Locale = Locale.getDefault()): String {
+    val formatter = SimpleDateFormat(format, locale)
+    return formatter.format(this)
+}
+
+fun getCurrentDateTime(): Date {
+    return Calendar.getInstance().time
 }

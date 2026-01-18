@@ -15,16 +15,28 @@ class AuthStore(context: Context) {
 
     private val dataStore = context.dataStore
     private val TOKEN_KEY = stringPreferencesKey("jwt_token")
+    private val NAME_KEY = stringPreferencesKey("name_token")
+    private val ID_KEY = stringPreferencesKey("id_token")
 
     val tokenFlow: Flow<String?> = dataStore.data
         .map { it[TOKEN_KEY] }
 
-    suspend fun saveToken(token: String) {
+    val nameFlow: Flow<String?> = dataStore.data
+        .map { it[NAME_KEY] }
+
+    val idFlow: Flow<String?> = dataStore.data
+        .map { it[ID_KEY] }
+
+    suspend fun saveUser(token: String, name: String, id: String) {
         dataStore.edit { it[TOKEN_KEY] = token }
+        dataStore.edit { it[NAME_KEY] = name }
+        dataStore.edit { it[ID_KEY] = id }
     }
 
     suspend fun clear() {
         dataStore.edit { it.remove(TOKEN_KEY) }
+        dataStore.edit { it.remove(NAME_KEY) }
+        dataStore.edit { it.remove(ID_KEY) }
     }
 
     fun getTokenBlocking(): String? = runBlocking {

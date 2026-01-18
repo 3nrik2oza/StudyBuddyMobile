@@ -23,5 +23,7 @@ data class ForumState(
     val newThreadSubjectId: Int = 0,
     val newThreadFacultyId: Int = 0,
 
-    val replyText: String = ""
+    val replyText: String = "",
+    val userId: String = "",
+    val name: String = ""
 )

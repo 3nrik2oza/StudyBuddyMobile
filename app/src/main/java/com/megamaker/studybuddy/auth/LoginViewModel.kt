@@ -39,12 +39,13 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
             body,
             { resp ->
                 val token = resp.optString("accessToken", "")
-
+                val name = resp.optString("name", "")
+                val id = resp.optString("userId", "")
                 if (token.isBlank()) {
                     _state.update { it.copy(loading = false, error = "Token nije vraćen.") }
                 } else {
                     viewModelScope.launch {
-                        authStore.saveToken(token)
+                        authStore.saveUser(token, name, id)
                         _state.update { it.copy(loading = false) }
                         onSuccess()
                     }
