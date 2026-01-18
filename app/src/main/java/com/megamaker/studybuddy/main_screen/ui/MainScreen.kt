@@ -20,186 +20,74 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
 import com.megamaker.studybuddy.data.Faculty
+import com.megamaker.studybuddy.forum.ForumEvent
+import com.megamaker.studybuddy.forum.ForumScreen
+import com.megamaker.studybuddy.forum.ForumViewModel
+import com.megamaker.studybuddy.thread.ThreadScreen
+import com.megamaker.studybuddy.thread.ThreadScreenEvent
+import com.megamaker.studybuddy.thread.ThreadViewModel
 
 @Composable
 fun MainScreen(
-    state: MainScreenState,
-    onEvent: (MainScreenEvent) -> Unit,
-    onLogout: () -> Unit
+    forumVm: ForumViewModel,
+    threadVm: ThreadViewModel
 ) {
 
-    if (state.showCreateFacultyDialog) {
-        AddNewFacultyDialog(
-            state = state,
-            onEvent = onEvent
-        )
-    }
+    val navController = rememberNavController()
 
-    Column(
-        modifier = Modifier.padding(16.dp)
-    ) {
+    NavHost(
+        navController = navController,
+        startDestination = "ForumScreen") {
 
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.End
-        ) {
-            Button(
-                onClick = onLogout,
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.error
-                )
-            ) {
-                Text("Logout")
+        composable("ForumScreen") { backStackEntry ->
+            val state by forumVm.state.collectAsState()
+
+            LaunchedEffect(backStackEntry) {
+                forumVm.onEvent(ForumEvent.LoadThreads)
             }
-        }
 
-        Spacer(Modifier.height(20.dp))
-
-        Text(
-            text = "StudyBuddy",
-            fontSize = 20.sp,
-            fontWeight = FontWeight.Bold
-        )
-
-        Spacer(Modifier.height(16.dp))
-
-        Column {
-            Text(
-                text = state.error
+            ForumScreen(
+                state = state,
+                onEvent = {
+                    when(it){
+                        is ForumEvent.OpenThread -> {
+                            navController.navigate("ThreadScreen")
+                            threadVm.onEvent(ThreadScreenEvent.OpenThreadScreen(it.threadId))
+                        }
+                        else -> {}
+                    }
+                    forumVm.onEvent(it)
+                }
             )
         }
 
-        /*
-        LazyColumn {
-            itemsIndexed(state.faculties) { _, item ->
-                FacultyCard(item)
-            }
-
-            item {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.Center
-                ) {
-                    Button(
-                        onClick = {
-                            onEvent(MainScreenEvent.ToggleCreateFacultyDialog)
+        composable("ThreadScreen") {
+            val state by threadVm.state.collectAsState()
+            ThreadScreen(
+                state = state,
+                onEvent = {
+                    when(it){
+                        is ThreadScreenEvent.OnBackClick -> {
+                            navController.popBackStack()
                         }
-                    ) {
-                        Text("Add new faculty")
+                        else -> {}
                     }
+                    threadVm.onEvent(it)
                 }
-            }
-        }*/
-    }
-}
-
-@Composable
-fun AddNewFacultyDialog(
-    state: MainScreenState,
-    onEvent: (MainScreenEvent) -> Unit
-) {
-    AlertDialog(
-        onDismissRequest = { onEvent(MainScreenEvent.ToggleCreateFacultyDialog) },
-        confirmButton = {},
-        dismissButton = {},
-        containerColor = Color.White,
-        title = {
-            Text(
-                text = "Create faculty",
-                fontSize = 20.sp,
-                fontWeight = FontWeight.Bold
             )
-        },
-        text = {
-            Column(
-                modifier = Modifier.padding(16.dp)
-            ) {
-
-                OutlinedTextField(
-                    modifier = Modifier.fillMaxWidth(),
-                    value = state.facultyName,
-                    placeholder = {
-                        Text(
-                            text = "Enter faculty name...",
-                            color = Color.LightGray
-                        )
-                    },
-                    maxLines = 1,
-                    onValueChange = {
-                        if (it.length < 30) {
-                            onEvent(MainScreenEvent.OnFacultyNameChange(it))
-                        }
-                    },
-                    keyboardOptions = KeyboardOptions(
-                        capitalization = KeyboardCapitalization.None
-                    )
-                )
-
-                Spacer(Modifier.height(16.dp))
-
-                OutlinedTextField(
-                    modifier = Modifier.fillMaxWidth(),
-                    value = state.facultySlug,
-                    placeholder = {
-                        Text(
-                            text = "Enter faculty slug",
-                            color = Color.LightGray
-                        )
-                    },
-                    maxLines = 1,
-                    onValueChange = {
-                        if (it.length < 30) {
-                            onEvent(MainScreenEvent.OnFacultySlugChange(it))
-                        }
-                    },
-                    keyboardOptions = KeyboardOptions(
-                        capitalization = KeyboardCapitalization.None
-                    )
-                )
-
-                Spacer(Modifier.height(16.dp))
-
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.Center
-                ) {
-                    Button(
-                        onClick = {
-                            onEvent(MainScreenEvent.CreateNewFaculty)
-                        }
-                    ) {
-                        Text("Create new faculty")
-                    }
-                }
-            }
         }
-    )
-}
-
-@Composable
-fun FacultyCard(
-    faculty: Faculty,
-    modifier: Modifier = Modifier,
-    onClick: () -> Unit = {}
-) {
-    Card(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 8.dp),
-        shape = RoundedCornerShape(12.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
-    ) {
-        Text(
-            text = faculty.name,
-            modifier = Modifier.padding(16.dp),
-            style = MaterialTheme.typography.titleMedium
-        )
     }
 }

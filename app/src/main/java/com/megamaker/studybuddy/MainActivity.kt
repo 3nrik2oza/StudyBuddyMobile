@@ -5,6 +5,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.navigation.compose.NavHost
@@ -46,39 +47,10 @@ class MainActivity : ComponentActivity() {
                         onLogin = { loginVm.login { } }
                     )
                 } else {
-                    val navController = rememberNavController()
-
-                    NavHost(
-                        navController = navController,
-                        startDestination = "ForumScreen") {
-
-                        composable("ForumScreen") {
-                            val state by forumVm.state.collectAsState()
-                            ForumScreen(
-                                state = state,
-                                onEvent = {
-                                    when(it){
-                                        is ForumEvent.OpenThread -> {
-                                            navController.navigate("ThreadScreen")
-                                            threadVm.onEvent(ThreadScreenEvent.OpenThreadScreen(it.threadId))
-                                        }
-                                        else -> {}
-                                    }
-                                    forumVm.onEvent(it)
-                                }
-                            )
-                        }
-
-                        composable("ThreadScreen") {
-                            val state by threadVm.state.collectAsState()
-                            ThreadScreen(
-                                state = state,
-                                onEvent = {
-                                    threadVm.onEvent(it)
-                                }
-                            )
-                        }
-                    }
+                    MainScreen(
+                        forumVm,
+                        threadVm,
+                    )
 
                 }
             }

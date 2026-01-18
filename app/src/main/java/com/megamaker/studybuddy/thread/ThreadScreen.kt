@@ -8,16 +8,23 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.Button
 import androidx.compose.material3.ElevatedCard
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.megamaker.studybuddy.data.ForumReply
@@ -33,13 +40,25 @@ fun ThreadScreen(
         modifier = Modifier
             .fillMaxSize()
             .padding(16.dp)
+            .padding(top = 20.dp)
     ) {
-        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+
+            IconButton(
+                onClick = { onEvent(ThreadScreenEvent.OnBackClick) },
+            ) {
+                Icon(
+                    imageVector = Icons.Default.ArrowBack,
+                    contentDescription = "Back"
+                )
+            }
+
+            Spacer(Modifier.width(10.dp))
+
             Text(
                 text = "Thread",
                 style = MaterialTheme.typography.titleLarge
             )
-            OutlinedButton(onClick = { /*onEvent(ForumEvent.BackToList)*/ }) { Text("Back") }
         }
 
         if (state.loading) {
@@ -58,9 +77,8 @@ fun ThreadScreen(
             thread = state.selectedThread,
             replies = state.selectedReplies,
             replyText = state.replyText,
-            onReplyChange = { /*onEvent(ForumEvent.OnReplyTextChange(it))*/ },
-            onSendReply = { /*onEvent(ForumEvent.SendReply)*/ },
-            onDelete = { /*onEvent(ForumEvent.DeleteThread(state.selectedThread.id))*/ }
+            onReplyChange = { onEvent(ThreadScreenEvent.OnReplyChange(it)) },
+            onSendReply = { onEvent(ThreadScreenEvent.SendReply) },
         )
     }
 }
@@ -73,7 +91,6 @@ private fun ThreadDetails(
     replyText: String,
     onReplyChange: (String) -> Unit,
     onSendReply: () -> Unit,
-    onDelete: () -> Unit
 ) {
     Column(modifier = Modifier.fillMaxSize()) {
         ElevatedCard(Modifier.fillMaxWidth()) {
@@ -83,9 +100,6 @@ private fun ThreadDetails(
                 Text(thread.content, style = MaterialTheme.typography.bodyMedium)
                 Spacer(Modifier.height(10.dp))
 
-                Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                    OutlinedButton(onClick = onDelete) { Text("Delete") }
-                }
             }
         }
 

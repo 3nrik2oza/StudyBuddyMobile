@@ -9,8 +9,9 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.megamaker.studybuddy.data.ForumReply
 import com.megamaker.studybuddy.data.ForumThread
+import com.megamaker.studybuddy.data.Subject
+import com.megamaker.studybuddy.ui.components.SimpleDropdown
 
 
 @Composable
@@ -28,6 +29,7 @@ fun ForumScreen(state: ForumState, onEvent: (ForumEvent) -> Unit) {
             modifier = Modifier
                 .fillMaxSize()
                 .padding(16.dp)
+                .padding(top = 20.dp)
         ) {
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                 Text(
@@ -42,8 +44,16 @@ fun ForumScreen(state: ForumState, onEvent: (ForumEvent) -> Unit) {
             }
 
             state.error?.let {
-                Spacer(Modifier.height(12.dp))
-                Text(text = it, color = MaterialTheme.colorScheme.error)
+                LazyColumn(
+
+                ) {
+                    item{
+                        Spacer(Modifier.height(12.dp))
+                        Text(text = it, color = MaterialTheme.colorScheme.error)
+                    }
+
+                }
+
             }
 
             Spacer(Modifier.height(12.dp))
@@ -120,19 +130,12 @@ private fun CreateThreadDialog(state: ForumState, onEvent: (ForumEvent) -> Unit)
                     label = { Text("Category") },
                     modifier = Modifier.fillMaxWidth()
                 )
-                OutlinedTextField(
-                    value = state.newThreadSubjectId.toString(),
-                    onValueChange = { onEvent(ForumEvent.OnNewThreadSubjectIdChange(it.toIntOrNull() ?: 0)) },
-                    label = { Text("SubjectId") },
-                    modifier = Modifier.fillMaxWidth()
-                )
-                OutlinedTextField(
-                    value = state.newThreadFacultyId.toString(),
-                    onValueChange = { onEvent(ForumEvent.OnNewThreadFacultyIdChange(it.toIntOrNull() ?: 0)) },
-                    label = { Text("FacultyId") },
-                    modifier = Modifier.fillMaxWidth()
+                SimpleDropdown(
+                    items = state.listOfSubjects,
+                    onItemClick = { onEvent(ForumEvent.OnNewThreadSubjectIdChange(it)) }
                 )
             }
         }
     )
 }
+

@@ -2,6 +2,7 @@ package com.megamaker.studybuddy.forum
 
 import com.megamaker.studybuddy.data.ForumReply
 import com.megamaker.studybuddy.data.ForumThread
+import com.megamaker.studybuddy.data.Subject
 
 
 data class ForumState(
@@ -25,5 +26,6 @@ data class ForumState(
 
     val replyText: String = "",
     val userId: String = "",
-    val name: String = ""
+    val name: String = "",
+    val listOfSubjects: List<Subject> = emptyList()
 )

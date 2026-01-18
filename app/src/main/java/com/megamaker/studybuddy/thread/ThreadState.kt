@@ -10,5 +10,8 @@ data class ThreadState(
     val loading: Boolean = false,
     val error: String? = null,
     val selectedReplies: List<ForumReply> = emptyList(),
-    val replyText: String = ""
+    val replyText: String = "",
+
+    val name: String = "",
+    val userId: String = "",
 )
